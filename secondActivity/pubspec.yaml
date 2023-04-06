@@ -1,0 +1,27 @@
+name: flutter_activity_1
+description: A new Flutter project.
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: '>=3.0.0-300.0.dev <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  styled_text: ^7.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  fonts:
+    - family: OoohBaby
+      fonts:
+      - asset: assets/OoohBaby-Regular.ttf
+        weight: 400
+  uses-material-design: true
+  assets:
+    - assets/pokeball.gif
