@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:nasa_api_app/tle_screen.dart';
 import 'package:nasa_api_app/mars_rover_screen.dart';
+import 'package:nasa_api_app/NASALibrary.dart';
 
 void main() => runApp(NasaApiApp());
 
@@ -26,6 +27,7 @@ class _ScreenState extends State<Screen> {
   final List<Widget> _screens = [
     TleScreen(),
     MarsRoverScreen(),
+    NASALibrary(),
   ];
 
   void onTabTapped(int index) {
@@ -51,7 +53,11 @@ class _ScreenState extends State<Screen> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.photo_camera),
-            label: 'Mars Rover',
+            label: 'Mars Rover Album',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.library_books),
+            label: 'NASA Image Library',
           ),
         ],
       ),
