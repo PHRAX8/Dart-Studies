@@ -47,6 +47,9 @@ class _MarsRoverScreenState extends State<MarsRoverScreen> {
   @override
   void initState() {
     super.initState();
+    setState(() {
+      isLoading = true;
+    });
     fetchMarsRoverPhotos().then((urls) {
       setState(() {
         imageUrls = urls;
@@ -78,20 +81,32 @@ class _MarsRoverScreenState extends State<MarsRoverScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: isLoading
-          ? Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              itemCount: imageUrls.length,
-              itemBuilder: (context, index) {
-                return Center(
-                  child: Image.network(
-                    imageUrls[index],
-                    fit: BoxFit.contain,
-                  ),
-                );
-              },
-            ),
+    return Scaffold(
+      body: Center(
+        child: isLoading
+            ? CircularProgressIndicator()
+            : GridView.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 4,
+                  childAspectRatio: 1.0,
+                ),
+                itemCount: imageUrls.length,
+                itemBuilder: (context, index) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.white,
+                        width: 2.0,
+                      ),
+                    ),
+                    child: Image.network(
+                      imageUrls[index],
+                      fit: BoxFit.cover,
+                    ),
+                  );
+                },
+              ),
+      ),
     );
   }
 }

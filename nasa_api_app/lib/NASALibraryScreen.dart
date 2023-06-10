@@ -52,9 +52,6 @@ class _NASALibraryState extends State<NASALibrary> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('NASA Image Library'),
-      ),
       body: Column(
         children: [
           Padding(
@@ -84,20 +81,32 @@ class _NASALibraryState extends State<NASALibrary> {
           ),
           Expanded(
             child: imageResults.isNotEmpty
-                ? ListView.builder(
+                ? GridView.builder(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 4,
+                      childAspectRatio: 1.0,
+                    ),
                     itemCount: imageResults.length,
                     itemBuilder: (context, index) {
                       final item = imageResults[index];
                       final links = item['links'] ?? [];
                       final imageUrl = links.isNotEmpty ? links[0]['href'] : '';
-                      return Padding(
-                        padding: const EdgeInsets.all(8.0),
+                      return Container(
                         child: imageUrl.isNotEmpty
-                            ? Image.network(
-                                imageUrl,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Text('Failed to load image');
-                                },
+                            ? Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 2.0,
+                                  ),
+                                ),
+                                child: Image.network(
+                                  imageUrl,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Center(child: Text('Failed to load image'));
+                                  },
+                                ),
                               )
                             : Container(),
                       );

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:nasa_api_app/tle_screen.dart';
-import 'package:nasa_api_app/mars_rover_screen.dart';
-import 'package:nasa_api_app/NASALibrary.dart';
+import 'package:nasa_api_app/TLEScreen.dart';
+import 'package:nasa_api_app/marsRoverScreen.dart';
+import 'package:nasa_api_app/NASALibraryScreen.dart';
 
 void main() => runApp(NasaApiApp());
 
@@ -25,7 +25,7 @@ class _ScreenState extends State<Screen> {
   int _currentIndex = 0;
 
   final List<Widget> _screens = [
-    TleScreen(),
+    TLEScreen(),
     MarsRoverScreen(),
     NASALibrary(),
   ];
