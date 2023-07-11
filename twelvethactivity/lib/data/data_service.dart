@@ -1,55 +1,39 @@
 import 'package:flutter/material.dart';
-
 import 'package:http/http.dart' as http;
-
 import 'dart:convert';
-
 import '../util/ordenador.dart';
 
 enum TableStatus { idle, loading, ready, error }
 
 enum ItemType {
-  beer,
-  coffee,
-  nation,
+  credit_cards,
+  users,
+  addresses,
   none;
 
   String get asString => '$name';
-
-  List<String> get columns => this == coffee
-      ? ["Nome", "Origem", "Tipo"]
-      : this == beer
-          ? ["Nome", "Estilo", "IBU"]
-          : this == nation
-              ? ["Nome", "Capital", "Idioma", "Esporte"]
+  List<String> get columns => this == users
+      ? ["Nome de Usuário", "E-mail", "Número de Telefone"]
+      : this == credit_cards
+          ? ["Número do Cartão", "Validade", "Tipo"]
+          : this == addresses
+              ? ["Cidade", "Bairro", "Rua", "CEP"]
               : [];
-
-  List<String> get properties => this == coffee
-      ? ["blend_name", "origin", "variety"]
-      : this == beer
-          ? ["name", "style", "ibu"]
-          : this == nation
-              ? ["nationality", "capital", "language", "national_sport"]
+  List<String> get properties => this == users
+      ? ["username", "email", "phone_number"]
+      : this == credit_cards
+          ? ["credit_card_number", "credit_card_expiry_date", "credit_card_type"]
+          : this == addresses
+              ? ["city", "street_name", "street_address", "zip_code"]
               : [];
 }
 
 class DataService {
   static const MAX_N_ITEMS = 15;
-
   static const MIN_N_ITEMS = 3;
-
   static const DEFAULT_N_ITEMS = 7;
-
-  List<int> _ListNumberOfItems = [MIN_N_ITEMS, DEFAULT_N_ITEMS, MAX_N_ITEMS];
-  List<int> get getListNumberOfItems {
-    return _ListNumberOfItems;
-  }
-
   int _numberOfItems = DEFAULT_N_ITEMS;
-
-  int get getNumberOfItems {
-    return _numberOfItems;
-  }
+  int get getNumberOfItems => _numberOfItems;
 
   set numberOfItems(n) {
     _numberOfItems = n < 0
@@ -65,30 +49,24 @@ class DataService {
     'itemType': ItemType.none
   });
 
-  void carregar(index) {
-    final params = [ItemType.coffee, ItemType.beer, ItemType.nation];
+  void carregarJson(String pathType, List<String> propertyList,
+      List<String> columnList, ItemType) {
+    if (tableStateNotifier.value['status'] == TableStatus.loading) return;
 
-    carregarPorTipo(params[index]);
+    if (tableStateNotifier.value['itemType'] != ItemType) {
+      tableStateNotifier.value = {
+        'itemType': ItemType,
+        'status': TableStatus.loading,
+        'dataObjects': []
+      };
+    }
   }
 
-  void ordenarEstadoAtual(final String propriedade) {
-    List objetos = tableStateNotifier.value['dataObjects'] ?? [];
-
-    if (objetos == []) return;
-    Ordenador ord = Ordenador();
-
-    Decididor d = ComparadorJSON(propriedade);
-
-    var objetosOrdenados = ord.ordenarFuderoso(objetos, d);
-
-    emitirEstadoOrdenado(objetosOrdenados, propriedade);
-  }
-
-  Uri montarUri(ItemType type) {
+  Uri montarUri(ItemType) {
     return Uri(
         scheme: 'https',
         host: 'random-data-api.com',
-        path: 'api/${type.asString}/random_${type.asString}',
+        path: 'api/v2/${ItemType.asString}',
         queryParameters: {'size': '$_numberOfItems'});
   }
 
@@ -103,7 +81,7 @@ class DataService {
   }
 
   void emitirEstadoOrdenado(List objetosOrdenados, String propriedade) {
-    var estado = tableStateNotifier.value;
+    var estado = Map<String, dynamic>.from(tableStateNotifier.value);
 
     estado['dataObjects'] = objetosOrdenados;
 
@@ -114,64 +92,107 @@ class DataService {
     tableStateNotifier.value = estado;
   }
 
-  void emitirEstadoCarregando(ItemType type) {
+  void emitirEstadoCarregando(ItemType) {
     tableStateNotifier.value = {
       'status': TableStatus.loading,
       'dataObjects': [],
-      'itemType': type
+      'itemType': ItemType
     };
   }
 
-  void emitirEstadoPronto(ItemType type, var json) {
+  void emitirEstadoPronto(ItemType, var json) {
     tableStateNotifier.value = {
-      'itemType': type,
+      'itemType': ItemType,
       'status': TableStatus.ready,
       'dataObjects': json,
-      'propertyNames': type.properties,
-      'columnNames': type.columns
+      'propertyNames': ItemType.properties,
+      'columnNames': ItemType.columns
     };
   }
 
   bool temRequisicaoEmCurso() =>
       tableStateNotifier.value['status'] == TableStatus.loading;
 
-  bool mudouTipoDeItemRequisitado(ItemType type) =>
-      tableStateNotifier.value['itemType'] != type;
+  bool mudouTipoDeItemRequisitado(ItemType) =>
+      tableStateNotifier.value['itemType'] != ItemType;
 
-  void carregarPorTipo(ItemType type) async {
+  void carregarPorTipo(ItemType) async {
     if (temRequisicaoEmCurso()) return;
 
-    if (mudouTipoDeItemRequisitado(type)) {
-      emitirEstadoCarregando(type);
+    if (mudouTipoDeItemRequisitado(ItemType)) {
+      emitirEstadoCarregando(ItemType);
     }
 
-    var uri = montarUri(type);
+    var uri = montarUri(ItemType);
 
-    var json = await acessarApi(uri); //, type);
+    var json = await acessarApi(uri);
 
-    emitirEstadoPronto(type, json);
+    emitirEstadoPronto(ItemType, json);
+  }
+
+  void carregar(index) {
+    final params = [ItemType.users, ItemType.credit_cards, ItemType.addresses];
+
+    carregarPorTipo(params[index]);
+  }
+
+  void ordenarEstadoAtual(String propriedade) {
+    List objetos = tableStateNotifier.value['dataObjects'] ?? [];
+
+    if (objetos == []) return;
+
+    Ordenador ord = Ordenador();
+
+    Decididor d = DecididorJSON(propriedade);
+
+    var objetosOrdenados = ord.ordenarFuderoso(objetos, d);
+
+    emitirEstadoOrdenado(objetosOrdenados, propriedade);
   }
 }
 
-final dataService = DataService();
-
-class ComparadorJSON extends Decididor {
-  final String propriedade;
-
-  final bool crescente;
-
-  ComparadorJSON(this.propriedade, [this.crescente = true]);
-
+class DecididorCervejaNomeCrescente extends Decididor {
   @override
   bool precisaTrocarAtualPeloProximo(atual, proximo) {
     try {
-      final ordemCorreta = crescente ? [atual, proximo] : [proximo, atual];
-
-      return ordemCorreta[0][propriedade]
-              .compareTo(ordemCorreta[1][propriedade]) >
-          0;
+      return atual["name"].compareTo(proximo["name"]) > 0;
     } catch (error) {
       return false;
     }
   }
 }
+
+class DecididorCervejaEstiloCrescente extends Decididor {
+  @override
+  bool precisaTrocarAtualPeloProximo(atual, proximo) {
+    try {
+      return atual["style"].compareTo(proximo["style"]) > 0;
+    } catch (error) {
+      return false;
+    }
+  }
+}
+
+class DecididorCervejaNomeDecrescente extends Decididor {
+  @override
+  bool precisaTrocarAtualPeloProximo(atual, proximo) {
+    try {
+      return atual["name"].compareTo(proximo["name"]) < 0;
+    } catch (error) {
+      return false;
+    }
+  }
+}
+
+class DecididorCervejaEstiloDecrescente extends Decididor {
+  @override
+  bool precisaTrocarAtualPeloProximo(atual, proximo) {
+    try {
+      return atual["style"].compareTo(proximo["style"]) < 0;
+    } catch (error) {
+      return false;
+    }
+  }
+}
+
+final dataService = DataService();
