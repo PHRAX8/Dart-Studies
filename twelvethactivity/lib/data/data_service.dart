@@ -22,7 +22,11 @@ enum ItemType {
   List<String> get properties => this == users
       ? ["username", "email", "phone_number"]
       : this == credit_cards
-          ? ["credit_card_number", "credit_card_expiry_date", "credit_card_type"]
+          ? [
+              "credit_card_number",
+              "credit_card_expiry_date",
+              "credit_card_type"
+            ]
           : this == addresses
               ? ["city", "street_name", "street_address", "zip_code"]
               : [];
@@ -34,6 +38,8 @@ class DataService {
   static const DEFAULT_N_ITEMS = 7;
   int _numberOfItems = DEFAULT_N_ITEMS;
   int get getNumberOfItems => _numberOfItems;
+  bool sortAscending = false;
+  int columnIndexClicked = 0;
 
   set numberOfItems(n) {
     _numberOfItems = n < 0
@@ -88,7 +94,7 @@ class DataService {
     estado['sortCriteria'] = propriedade;
 
     estado['ascending'] = true;
-
+    sortAscending = !(sortAscending);
     tableStateNotifier.value = estado;
   }
 
@@ -136,62 +142,23 @@ class DataService {
     carregarPorTipo(params[index]);
   }
 
-  void ordenarEstadoAtual(String propriedade) {
+  void ordenarEstadoAtualGenerico(
+      String propriedade, int columnIndex, bool reverse) {
+    columnIndexClicked = columnIndex;
     List objetos = tableStateNotifier.value['dataObjects'] ?? [];
 
-    if (objetos == []) return;
+    if (objetos.isEmpty) return;
 
     Ordenador ord = Ordenador();
-
     Decididor d = DecididorJSON(propriedade);
 
     var objetosOrdenados = ord.ordenarFuderoso(objetos, d);
 
+    if (reverse) {
+      objetosOrdenados = objetosOrdenados.reversed.toList();
+    }
+
     emitirEstadoOrdenado(objetosOrdenados, propriedade);
-  }
-}
-
-class DecididorCervejaNomeCrescente extends Decididor {
-  @override
-  bool precisaTrocarAtualPeloProximo(atual, proximo) {
-    try {
-      return atual["name"].compareTo(proximo["name"]) > 0;
-    } catch (error) {
-      return false;
-    }
-  }
-}
-
-class DecididorCervejaEstiloCrescente extends Decididor {
-  @override
-  bool precisaTrocarAtualPeloProximo(atual, proximo) {
-    try {
-      return atual["style"].compareTo(proximo["style"]) > 0;
-    } catch (error) {
-      return false;
-    }
-  }
-}
-
-class DecididorCervejaNomeDecrescente extends Decididor {
-  @override
-  bool precisaTrocarAtualPeloProximo(atual, proximo) {
-    try {
-      return atual["name"].compareTo(proximo["name"]) < 0;
-    } catch (error) {
-      return false;
-    }
-  }
-}
-
-class DecididorCervejaEstiloDecrescente extends Decididor {
-  @override
-  bool precisaTrocarAtualPeloProximo(atual, proximo) {
-    try {
-      return atual["style"].compareTo(proximo["style"]) < 0;
-    } catch (error) {
-      return false;
-    }
   }
 }
 

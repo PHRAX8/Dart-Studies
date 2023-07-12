@@ -89,10 +89,15 @@ class DataTableWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DataTable(
+        sortColumnIndex: dataService.columnIndexClicked,
+        sortAscending: dataService.sortAscending,
         columns: columnNames
             .map((name) => DataColumn(
                 onSort: (columnIndex, ascending) =>
-                    dataService.ordenarEstadoAtual(propertyNames[columnIndex]),
+                    dataService.ordenarEstadoAtualGenerico(
+                        propertyNames[columnIndex],
+                        columnIndex,
+                        dataService.sortAscending),
                 label: Expanded(
                     child: Text(name,
                         style: TextStyle(fontStyle: FontStyle.italic)))))
