@@ -7,4 +7,5 @@ firstActivity.dart - {Unidade 1 - Tarefa 1 - Venda, Item e Produto}
 /eighthactivity & /ninthactivty - {Unidade 2 - Tarefa 2 - Programação Assíncrona}           
 /tenthactivity - {Unidade 2 - Tarefa 3 - Infinite scroll}                  
 /nasa_api_app - {Unidade 2 - Tarefa 4 - Mini-projeto}              
-/twelvethactivity - {Unidade 3 - Tarefa 1 - ordenação e filtragem com polimorfismo}
+/twelvethactivity - {Unidade 3 - Tarefa 1 - ordenação e filtragem com polimorfismo}             
+/thirteenthactivity - {Unidade 3 - Tarefa 2 - mais ordenação e filtragem com polimorfismo}
